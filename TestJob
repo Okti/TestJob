@@ -1,0 +1,130 @@
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
+
+public class ApacheLog {
+  
+	private static final String IPREGEX = "([0-9]{1,3}\\.){3}[0-9]{1,3}";
+	private static final String TIMEREGEX = "[0-9]{1,4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}";
+	
+		
+	static void doread(String fName) { 
+		
+		LinkedList<String> list = new LinkedList<String>();
+		StringTokenizer str = null;
+		char words[] = null;
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		
+		
+		try( FileInputStream fis = new FileInputStream(fName)) { 
+			
+			String one = null;
+			String two = null;
+			String four = null;
+			String seven = null;
+			String eight = null;
+			
+			DataInputStream dis = new DataInputStream(fis);
+			BufferedReader bfr = new BufferedReader(new InputStreamReader(fis));
+			
+			String line = null;
+			char buffer[] = new char[fis.available()];
+			
+			while ((line = bfr.readLine()) != null) {
+				list.add(line);
+				str = new StringTokenizer(line, " - + ");
+				one = str.nextToken();
+				two = "Uzklausos laikas: "+str.nextToken()+"\n"; 
+				String tree = str.nextToken();
+				four = str.nextToken();
+				String five = str.nextToken();
+				String six = str.nextToken();
+				seven = str.nextToken();
+				eight = str.nextToken();
+/*				System.out.println("one:  "+one+
+						"two: "+two+
+						"tree: "+tree+
+						"four: "+four+
+						"Five: "+five+
+						"Six: "+six+
+						"Seven: "+seven+
+						"Eight: "+eight);	*/
+				
+				
+				Pattern kod = Pattern.compile("[POSTGETHEADOPTION]+");
+				Matcher ma = kod.matcher(four);
+				
+				String kodas = ma.find() ? "HTTP kodas: "+ma.group()+"\n" : null;
+				
+				
+				Pattern status = Pattern.compile("[0-500]+");
+				Matcher sta = status.matcher(seven);
+				
+				String kodosuma = sta.find() ? "Http uzklausos suma: "+sta.group()+"\n" : null;
+				
+				Pattern size = Pattern.compile("[1-900]+");
+				Matcher sa = size.matcher(eight);
+				
+				String realsize = sa.find() ? "Atsakymo dydis: "+sa.group()+"\n" : null;
+				
+						
+				
+				
+				
+			
+			
+			Pattern p = Pattern.compile(IPREGEX);
+			Matcher m = p.matcher(one);
+			
+			two.replace('[', ' ');
+			
+			String ipadresas = m.find() ? "Ip adresas: "+m.group()+"\n" : null;
+			bos.write(ipadresas.getBytes());
+			bos.write(kodas.getBytes());
+			bos.write(kodosuma.getBytes());
+			bos.write(realsize.getBytes());
+			
+			bos.write(two.getBytes());
+			
+			
+			
+			
+		
+			
+			
+			
+						
+			
+			
+			}
+			
+		} catch (IOException e) { 
+			System.out.println("Error: "+e); }
+		
+		try { 
+			
+			FileOutputStream fos = new FileOutputStream("finalx.txt");
+			bos.writeTo(fos);
+		} catch (IOException e) { 
+			System.out.println("Error: "+e); }
+		
+	}
+	
+	
+	public static void main(String[] args) { 
+		
+		ApacheLog.doread("/home/okti/Downloads/logas");
+	}
+}
